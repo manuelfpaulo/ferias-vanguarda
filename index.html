@@ -300,6 +300,27 @@
     display: none;
   }
 
+  .estado, .resultado-verificacao {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .barra-regressiva {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: currentColor;
+    opacity: 0.45;
+    transform-origin: left;
+  }
+
+  @keyframes contagemRegressiva {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+
   .resultado-verificacao.mostrar { display: block; }
   .resultado-verificacao.encontrado { background: #e6f4ec; border: 1px solid #b7ddc4; }
   .resultado-verificacao.nao-encontrado { background: #fbeceb; border: 1px solid #edc4c1; }
@@ -514,6 +535,24 @@
   const dropdownProvincia = criarDropdown('provinciaTrigger', 'provinciaOptions', 'provincia', PROVINCIAS);
   const dropdownVerTurma = criarDropdown('verTurmaTrigger', 'verTurmaOptions', 'verTurma', TURMAS);
 
+  // ---Barra de contagem regressiva para auto-ocultar mensagens ---
+  function autoOcultar(elemento, duracaoMs = 5000) {
+    clearTimeout(elemento._temporizador);
+    let barra = elemento.querySelector('.barra-regressiva');
+    if (!barra) {
+      barra = document.createElement('div');
+      barra.className = 'barra-regressiva';
+      elemento.appendChild(barra);
+    }
+    barra.style.animation = 'none';
+    void barra.offsetWidth; // força reflow para reiniciar a animação
+    barra.style.animation = `contagemRegressiva ${duracaoMs}ms linear forwards`;
+
+    elemento._temporizador = setTimeout(() => {
+      elemento.classList.remove('mostrar');
+    }, duracaoMs);
+  }
+  
   // --- Validação por campo: mensagem de obrigatoriedade + sinal de "abanar" ---
   function mostrarErroCampo(elemento, msgEl, texto) {
     msgEl.textContent = texto;
@@ -616,6 +655,7 @@
   function mostrarEstado(tipo, mensagem) {
     estadoEl.className = 'estado mostrar ' + tipo;
     estadoEl.textContent = mensagem;
+    autoOcultar(estadoEl);
   }
 
   async function enviarParaServidor(dados) {
@@ -790,6 +830,7 @@
 
       if (!resultado.sucesso) {
         mostrarResultado('nao-encontrado', resultado.erro || 'Não foi possível verificar agora.');
+        autoOcultar(resultadoEl);
       } else if (resultado.encontrado) {
         resultadoEl.className = 'resultado-verificacao mostrar encontrado';
         if (resultado.resultados.length === 1) {
@@ -804,6 +845,7 @@
               <dt>Contacto Pessoal</dt><dd>${d.contactoPessoal}</dd>
               <dt>Contacto Familiar</dt><dd>${d.contactoFamiliar}</dd>
             </dl>`;
+          autoOcultar(resultadoEl); 
         } else {
           const linhas = resultado.resultados.map(d => `
             <dl>
@@ -823,6 +865,7 @@
       }
     } catch (erro) {
       mostrarResultado('nao-encontrado', 'Não foi possível ligar ao servidor. Tente novamente quando tiver internet.');
+      autoOcultar(resultadoEl);
     }
 
     btnVerificar.disabled = false;
@@ -832,6 +875,7 @@
   function mostrarResultado(tipo, mensagem) {
     resultadoEl.className = 'resultado-verificacao mostrar ' + tipo;
     resultadoEl.textContent = mensagem;
+    autoOcultar(resultadoEl); 
   }
 </script>
 
