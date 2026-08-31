@@ -606,17 +606,23 @@
   // --- Máscara e validação dos contactos (formato moçambicano: 8X XXX XXXX) ---
   function contactoValido(valor) {
     const digitos = valor.replace(/\D/g, '');
-    return /^8\d{8}$/.test(digitos); // 9 dígitos, começado por 8
+    return /^8[2-8]\d{7}$/.test(digitos); // 9 dígitos: 8, depois 2-8, depois mais 7
   }
-
+  
   function aplicarMascaraContacto(id) {
     const input = document.getElementById(id);
     input.addEventListener('input', () => {
       let digitos = input.value.replace(/\D/g, '');
+  
       // descarta dígitos iniciais que não sejam 8
       while (digitos.length > 0 && digitos[0] !== '8') {
         digitos = digitos.slice(1);
       }
+      // se o segundo dígito não for 2-8, remove-o (não deixa escrever)
+      if (digitos.length > 1 && !/[2-8]/.test(digitos[1])) {
+        digitos = digitos.slice(0, 1) + digitos.slice(2);
+      }
+  
       digitos = digitos.slice(0, 9);
       let formatado = digitos;
       if (digitos.length > 2) formatado = digitos.slice(0, 2) + ' ' + digitos.slice(2, 5);
@@ -626,6 +632,7 @@
   }
   aplicarMascaraContacto('contactoPessoal');
   aplicarMascaraContacto('contactoFamiliar');
+
 
   function lerFila() {
     try {
