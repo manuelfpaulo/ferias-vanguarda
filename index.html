@@ -553,6 +553,11 @@
       elemento.classList.remove('mostrar');
     }, duracaoMs);
   }
+
+  function limparCamposVerificacao() {
+    dropdownVerTurma.reset();
+    document.getElementById('verNome').value = '';
+  }
   
   // --- Validação por campo: mensagem de obrigatoriedade + sinal de "abanar" ---
   function mostrarErroCampo(elemento, msgEl, texto) {
@@ -868,8 +873,10 @@
             <strong>✓ ${resultado.resultados.length} cadetes encontrados com esse primeiro nome em ${turma}. Confirme qual é o seu:</strong>
             ${linhas}`;
         }
+        limparCamposVerificacao();
       } else {
         mostrarResultado('nao-encontrado', 'Ainda não encontrado nesta turma. Se acabou de submeter e está sem internet, aguarde a ligação — o registo será enviado automaticamente.');
+        limparCamposVerificacao();
       }
     } catch (erro) {
       mostrarResultado('nao-encontrado', 'Não foi possível ligar ao servidor. Tente novamente quando tiver internet.');
